@@ -10,12 +10,15 @@ const Navigation = () => {
         <Fragment>
             <div className="navigation">
 
+                {/* CROWN-CLOTHING LOGO IN NAVBAR */}
                 <Link className="logo-container" to="/">
                     <CrownLogo className="logo" />
                 </Link>
                 
+                {/* OTHER PAGE LINKS  */}
                 <div className="nav-links-container">
                     <Link className="nav-link" to="/shop"> SHOP </Link>
+                    <Link className="nav-link" to="/sign-in"> SIGN IN </Link>
                 </div>
 
             </div>
