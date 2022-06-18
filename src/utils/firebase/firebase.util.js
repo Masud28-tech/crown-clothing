@@ -1,9 +1,15 @@
 import { initializeApp } from "firebase/app"; // importing the (main thing that is needed to start using firebase auth/db/etc service) firebase app from firebase
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut
+} from "firebase/auth"; // Authentication imports from firebase
 
-import {getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword} from "firebase/auth"; // Authentication imports from firebase
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore"; // Database imports from firebase
 
-import {getFirestore, doc, getDoc, setDoc} from "firebase/firestore"; // Database imports from firebase
- 
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -24,7 +30,7 @@ const firebaseApp = initializeApp(firebaseConfig);
 const googleProvider = new GoogleAuthProvider();
 
 googleProvider.setCustomParameters({
-    prompt : "select_account"
+  prompt: "select_account"
 })
 
 export const auth = getAuth();
@@ -37,46 +43,49 @@ export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider)
 export const db = getFirestore();
 
 // Creating user document(Table) in firebase database
-export const createUserDocumentFromAuth = async (userAuth, additionalInfo={}) => {
-    if(!userAuth) return;
-    
-    const userDocRef = doc(db, "users", userAuth.uid); // 'doc' method of firestore to create document & needs {db(database instance), collection name(table name), unique id/key/identifier}
-    // console.log(userDocRef);
+export const createUserDocumentFromAuth = async (userAuth, additionalInfo = {}) => {
+  if (!userAuth) return;
 
-    const userSnapshot = await getDoc(userDocRef); // 'getDoc' methode creates a Snapshot of collection/document reference created by 'doc' method, and further can be used...
-    // console.log(userSnapshot.exists());
+  const userDocRef = doc(db, "users", userAuth.uid); // 'doc' method of firestore to create document & needs {db(database instance), collection name(table name), unique id/key/identifier}
+  // console.log(userDocRef);
 
-    // NOW CREATING/SAVING USER DOCUMENT IN THE DATABASE USING "setDoc" METHODE
+  const userSnapshot = await getDoc(userDocRef); // 'getDoc' methode creates a Snapshot of collection/document reference created by 'doc' method, and further can be used...
+  // console.log(userSnapshot.exists());
 
-    // Check: That a user already exist or not in the db
-    // If doesn't exits then create it.
-    if(!userSnapshot.exists()){
-      
-      const {displayName, email} = userAuth;
-      const createdAt = new Date();
+  // NOW CREATING/SAVING USER DOCUMENT IN THE DATABASE USING "setDoc" METHODE
 
-      try{
-        await setDoc(userDocRef, {displayName, email, createdAt, ...additionalInfo}); // Main methode to create/save user document
-      }
-      catch(error){
-        console.log("Error creating the user", error.message);
-      }
+  // Check: That a user already exist or not in the db
+  // If doesn't exits then create it.
+  if (!userSnapshot.exists()) {
+
+    const { displayName, email } = userAuth;
+    const createdAt = new Date();
+
+    try {
+      await setDoc(userDocRef, { displayName, email, createdAt, ...additionalInfo }); // Main methode to create/save user document
     }
-    // If exist then return 'userDocRef'
-    return userDocRef;
+    catch (error) {
+      console.log("Error creating the user", error.message);
+    }
+  }
+  // If exist then return 'userDocRef'
+  return userDocRef;
 }
 
 
 //CREATING USER WITH EMAIL AND PASSWORD (creating a function which uses firebase methode of 'createUserWithEmailAndPassword')
 export const createUserAuthWithEmailAndPassword = async (email, password) => {
-    if(!email || !password) return;
+  if (!email || !password) return;
 
-    return await createUserWithEmailAndPassword(auth, email, password);
+  return await createUserWithEmailAndPassword(auth, email, password);
 }
 
 
 export const signInUserAuthWithEmailAndPassword = async (email, password) => {
-  if(!email || !password) return;
+  if (!email || !password) return;
 
   return await signInWithEmailAndPassword(auth, email, password);
 }
+
+// Function to sign-out signed in user
+export const signOutUser = async () => await signOut(auth);
