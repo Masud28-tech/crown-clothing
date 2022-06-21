@@ -1,8 +1,7 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 
 import { createUserAuthWithEmailAndPassword, createUserDocumentFromAuth } from "../../utils/firebase/firebase.util";
 
-import { UserContext } from "../../context/user.context"; 
 import FormInput from "../form-input/form-input.component";
 import Button from "../button/button.component";
 
@@ -21,7 +20,6 @@ const SignUpForm = () => {
 
     const [formFields, setFormFields] = useState(defaultFormFields);
     const { displayName, email, password, confirmPassword } = formFields;
-    const {setCurrentUser} = useContext(UserContext);
 
     const resetFormFields = () => {
         setFormFields(defaultFormFields);
@@ -43,7 +41,6 @@ const SignUpForm = () => {
         try {
             const { user } = await createUserAuthWithEmailAndPassword(email, password);
             await createUserDocumentFromAuth(user, { displayName });  // DisplayName is passed additionally cause, it may not gotten automaticy by 'createUserAuthDocument' methode
-            setCurrentUser(user);
         }
         catch (error) {
             console.log("Account creation encountered and error", error);
