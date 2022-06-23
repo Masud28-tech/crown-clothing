@@ -1,5 +1,6 @@
 body {
   margin: 0;
+  padding: 20px 40px;
   font-family: 'Encode Sans Semi Condensed','Saira Condensed','Open Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -17,4 +18,12 @@ a{
 
 *{
   box-sizing: border-box;
+}
+
+
+*{
+  -ms-overflow-style: none;
+}
+::-webkit-scrollbar {
+  display: none;
 }
