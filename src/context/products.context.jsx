@@ -1,19 +1,36 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
-import PRODUCTS from "../shop-data.json";
+import { addCollectionAndDocumentInFirebase, getCollectionAndDocumentFromFirebase } from "../utils/firebase/firebase.util.js";
 
-export const ProductsContext = createContext({
-    products : [],
+// import SHOP_DATA from "../shop-data.js";
+
+export const CategoriesContext = createContext({
+    categoriesMap: {}
 });
 
-export const ProductsProvider = ({children}) => {
+export const CategoriesProvider = ({ children }) => {
 
-    const [products , setProducts] = useState(PRODUCTS);
-    const value = {products};
+    const [categoriesMap, setCategoriesMap] = useState({});
+    const value = { categoriesMap };
+
+    //1] STORES 'categories' collection IN FIREBASE DATABASE ON RENDERING THATS WHY COMMENTED
+    // useEffect(() => {
+    //     addCollectionAndDocumentInFirebase("categories", SHOP_DATA);
+    // }, []);
+
+
+    //2] FETCHS 'categories' collection from firebase
+    useEffect(() => {
+        const getCollectionAndDocument = async () => {
+            const categoryMap = await getCollectionAndDocumentFromFirebase();
+            setCategoriesMap(categoryMap);
+        }
+        getCollectionAndDocument();
+    }, [])
 
     return (
-        <ProductsContext.Provider value={value}>
+        <CategoriesContext.Provider value={value}>
             {children}
-        </ProductsContext.Provider>
+        </CategoriesContext.Provider>
     );
 };

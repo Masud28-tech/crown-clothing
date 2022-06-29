@@ -9,7 +9,16 @@ import {
   onAuthStateChanged
 } from "firebase/auth"; // Authentication imports from firebase
 
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore"; // Database imports from firebase
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  writeBatch,
+  getDocs,
+  query
+} from "firebase/firestore"; // Database imports from firebase
 
 
 // Your web app's Firebase configuration
@@ -42,6 +51,37 @@ export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider)
 
 // DATABASE PART
 export const db = getFirestore();
+
+//Fucntion to Create/Add/Store (data i.e collections and objects) in firestore database at firebase
+export const addCollectionAndDocumentInFirebase = async (collectionKey, objectsToAdd) => {
+  const collectionRef = collection(db, collectionKey);
+
+  const batch = writeBatch(db);  // 'writeBatch' & batch is for setting/storing objects/documents in collection as Transaction i.e. either done successfully or faild completely.
+
+  // From the list of objects/array storing one by one as a document using foreach loop and batch.set function
+  objectsToAdd.forEach((object) => {
+    const docRef = doc(collectionRef, object.title.toLowerCase());
+    batch.set(docRef, object);
+  });
+
+  await batch.commit();
+  console.log("Documents stored successfully in firestore.");
+}
+
+// Function to get document/collection from firebase database
+export const getCollectionAndDocumentFromFirebase = async () => {
+    const collectionRef = collection(db, "categories");
+    const que = query(collectionRef);
+    const querySnapshot = await getDocs(que);
+
+    const categoryMap = querySnapshot.docs.reduce((accumulate, docsSnapshot) => {
+      const {title , items} = docsSnapshot.data();
+      accumulate[title.toLowerCase()] = items; 
+      return accumulate;
+    }, {});
+
+    return categoryMap;
+}
 
 // Creating user document(Table) in firebase database
 export const createUserDocumentFromAuth = async (userAuth, additionalInfo = {}) => {
@@ -81,7 +121,7 @@ export const createUserAuthWithEmailAndPassword = async (email, password) => {
   return await createUserWithEmailAndPassword(auth, email, password);
 }
 
-
+// Function to sign-in user using email & password
 export const signInUserAuthWithEmailAndPassword = async (email, password) => {
   if (!email || !password) return;
 
